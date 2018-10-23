@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import javax.annotation.Resource;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -19,7 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 public class AppContextSolrTest {
 
     @Resource(name = "solrServer")
-    private SolrServer solrServer;
+    private SolrClient solrServer;
 
     @Before
     public void init() {

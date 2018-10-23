@@ -10,7 +10,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -26,7 +26,7 @@ public class SolrIndexUpdater {
     Logger LOG = LoggerFactory.getLogger(SolrIndexUpdater.class);
 
     @Resource(name = "solrServer")
-    private SolrServer solrServer;
+    private SolrClient solrServer;
     
     public void persist(OrcidSolrDocument orcidSolrDocument) {
         try {
@@ -52,7 +52,7 @@ public class SolrIndexUpdater {
                 return (Date) results.get(0).getFieldValue(PROFILE_LAST_MODIFIED_DATE);
             }
 
-        } catch (SolrServerException e) {
+        } catch (SolrServerException | IOException e) {
             throw new NonTransientDataAccessResourceException("Error retrieving last modified date from SOLR Server", e);
         }
     }

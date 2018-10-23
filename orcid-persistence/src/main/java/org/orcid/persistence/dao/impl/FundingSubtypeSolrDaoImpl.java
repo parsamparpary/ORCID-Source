@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.orcid.persistence.dao.FundingSubTypeSolrDao;
@@ -17,10 +17,10 @@ import org.springframework.dao.NonTransientDataAccessResourceException;
 public class FundingSubtypeSolrDaoImpl implements FundingSubTypeSolrDao {
 
     @Resource(name = "orgFundingSubTypeSolrServer")
-    private SolrServer solrServer;
+    private SolrClient solrServer;
 
     @Resource(name = "orgFundingSubTypeSolrServerReadOnly")
-    private SolrServer solrServerReadOnly;
+    private SolrClient solrServerReadOnly;
 
     @Override
     public void persist(OrgDefinedFundingTypeSolrDocument fundingType) {
@@ -39,11 +39,11 @@ public class FundingSubtypeSolrDaoImpl implements FundingSubTypeSolrDao {
         SolrQuery query = new SolrQuery();
         query.setQuery(
                 "{!edismax qf='org-defined-funding-type^50.0 text^1.0' pf='org-defined-funding-type^50.0' mm=1 sort='score desc'}"
-                        + searchTerm + "*").setFields("*");
+                        + searchTerm + "*").setFields("*");        
         try {
             QueryResponse queryResponse = solrServerReadOnly.query(query);
             return queryResponse.getBeans(OrgDefinedFundingTypeSolrDocument.class);
-        } catch (SolrServerException se) {
+        } catch (IOException | SolrServerException se) {
             String errorMessage = MessageFormat.format("Error when attempting to search for orgs, with search term {0}", new Object[] { searchTerm });
             throw new NonTransientDataAccessResourceException(errorMessage, se);
         }

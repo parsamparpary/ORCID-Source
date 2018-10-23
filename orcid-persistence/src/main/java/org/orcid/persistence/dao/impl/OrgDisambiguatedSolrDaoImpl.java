@@ -9,7 +9,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.orcid.persistence.dao.OrgDisambiguatedSolrDao;
@@ -19,10 +19,10 @@ import org.springframework.dao.NonTransientDataAccessResourceException;
 public class OrgDisambiguatedSolrDaoImpl implements OrgDisambiguatedSolrDao {
 
     @Resource(name = "orgDisambiguatedSolrServer")
-    private SolrServer solrServer;
+    private SolrClient solrServer;
 
     @Resource(name = "orgDisambiguatedSolrServerReadOnly")
-    private SolrServer solrServerReadOnly;
+    private SolrClient solrServerReadOnly;
 
     @Override
     public void persist(OrgDisambiguatedSolrDocument orgDisambiguatedSolrDocument) {
@@ -55,10 +55,10 @@ public class OrgDisambiguatedSolrDaoImpl implements OrgDisambiguatedSolrDao {
                 OrgDisambiguatedSolrDocument document = queryResponse.getBeans(OrgDisambiguatedSolrDocument.class).get(0);
                 return document;
             }
-        } catch (SolrServerException se) {
+        } catch (SolrServerException | IOException se) {
             String errorMessage = MessageFormat.format("Error when attempting to retrieve org {0}", new Object[] { id });
             throw new NonTransientDataAccessResourceException(errorMessage, se);
-        }
+        } 
         return null;
     }
 
@@ -82,7 +82,7 @@ public class OrgDisambiguatedSolrDaoImpl implements OrgDisambiguatedSolrDao {
         try {
             QueryResponse queryResponse = solrServerReadOnly.query(query);
             return queryResponse.getBeans(OrgDisambiguatedSolrDocument.class);
-        } catch (SolrServerException se) {
+        } catch (SolrServerException | IOException se) {
             String errorMessage = MessageFormat.format("Error when attempting to search for orgs, with search term {0}", new Object[] { searchTerm });
             throw new NonTransientDataAccessResourceException(errorMessage, se);
         }
@@ -96,7 +96,7 @@ public class OrgDisambiguatedSolrDaoImpl implements OrgDisambiguatedSolrDao {
         try {
             QueryResponse queryResponse = solrServerReadOnly.query(query);
             return queryResponse.getBeans(OrgDisambiguatedSolrDocument.class);
-        } catch (SolrServerException se) {
+        } catch (SolrServerException | IOException se) {
             String errorMessage = MessageFormat.format("Error when attempting to search for orgs for self-service, with search term {0}", new Object[] { searchTerm });
             throw new NonTransientDataAccessResourceException(errorMessage, se);
         }

@@ -19,7 +19,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -33,13 +33,13 @@ import org.springframework.dao.NonTransientDataAccessResourceException;
 public class SolrDaoImpl implements SolrDao {
 
     @Resource(name = "solrServer")
-    private SolrServer solrServer;
+    private SolrClient solrServer;
 
     @Resource(name = "solrServerReadOnly")
-    private SolrServer solrServerReadOnly;
+    private SolrClient solrServerReadOnly;
 
     @Resource(name = "solrServerForStreaming")
-    private SolrServer solrServerForStreaming;
+    private SolrClient solrServerForStreaming;
 
     @Override
     public void persist(OrcidSolrDocument orcidSolrDocument) {
@@ -80,10 +80,10 @@ public class SolrDaoImpl implements SolrDao {
                 orcidSolrResult.setOrcid((String) solrDocument.get(ORCID));
                 orcidSolrResult.setPublicProfileMessage((String) solrDocument.getFieldValue(PUBLIC_PROFILE));
             }
-        } catch (SolrServerException se) {
+        } catch (SolrServerException | IOException se) {
             String errorMessage = MessageFormat.format("Error when attempting to retrieve orcid {0}", new Object[] { orcid });
             throw new NonTransientDataAccessResourceException(errorMessage, se);
-        }
+        } 
 
         return orcidSolrResult;
     }
@@ -97,12 +97,12 @@ public class SolrDaoImpl implements SolrDao {
             QueryResponse queryResponse = solrServerForStreaming.query(query);
             InputStream inputStream = (InputStream) queryResponse.getResponse().get("stream");
             return new InputStreamReader(inputStream, "UTF-8");
-        } catch (SolrServerException | SolrException e) {
-            String errorMessage = MessageFormat.format("Error when attempting to retrieve stream for orcid {0}", new Object[] { orcid });
-            throw new NonTransientDataAccessResourceException(errorMessage, e);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
-        }
+        } catch (SolrServerException | SolrException  | IOException e) {
+            String errorMessage = MessageFormat.format("Error when attempting to retrieve stream for orcid {0}", new Object[] { orcid });
+            throw new NonTransientDataAccessResourceException(errorMessage, e);
+        } 
     }
 
     @Override
@@ -144,7 +144,7 @@ public class SolrDaoImpl implements SolrDao {
                 return (Date) results.get(0).getFieldValue(PROFILE_LAST_MODIFIED_DATE);
             }
 
-        } catch (SolrServerException e) {
+        } catch (SolrServerException | IOException e) {
             throw new NonTransientDataAccessResourceException("Error retrieving last modified date from SOLR Server", e);
         }
     }
@@ -164,7 +164,7 @@ public class SolrDaoImpl implements SolrDao {
             }
             orcidSolrResults.setNumFound(queryResponse.getResults().getNumFound());
 
-        } catch (SolrServerException se) {
+        } catch (SolrServerException | IOException se) {
             throw new NonTransientDataAccessResourceException("Error retrieving from SOLR Server", se);
         }
         return orcidSolrResults;
