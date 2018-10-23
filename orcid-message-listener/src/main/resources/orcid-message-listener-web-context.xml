@@ -25,7 +25,7 @@
 
 	<!--SOLR -->
 	<!-- Confusingly, the client is actually called a server -->
-	<bean id="solrServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer">
+	<bean id="solrServer" class="org.apache.solr.client.solrj.impl.SolrClient">
 		<constructor-arg value="${org.orcid.persistence.solr.url}" />
 		<property name="soTimeout" value="${org.orcid.listener.persistence.solr.socketTimeout}" />
 		<property name="connectionTimeout" value="${org.orcid.persistence.solr.connectionTimeout}" />

@@ -26,8 +26,7 @@ class EmbeddedSolrFactory {
         if(coreContainer == null){
             coreContainer = createCoreContainer();
         }
-        EmbeddedSolrServer server = new EmbeddedSolrServer(coreContainer, coreName);
-        return server;
+        return new EmbeddedSolrServer(coreContainer, coreName);
     }
 
     private static CoreContainer createCoreContainer() throws FileNotFoundException {
